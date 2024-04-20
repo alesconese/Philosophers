@@ -1,0 +1,45 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: ade-tole <ade-tole@student.42barcel>       +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/04/20 18:45:25 by ade-tole          #+#    #+#              #
+#    Updated: 2024/04/20 18:45:28 by ade-tole         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME	=	philo
+
+CC		=	gcc
+
+SRCS	=	main.c
+
+INCS	=	philo.h
+
+FLAGS	=	-Wall -Wextra -Werror -MMD -g #-fsanitize=address -pthread
+
+OBJS	=	$(SRCS:.c=.o)
+
+DEPS	=	$(SRCS:.c=.d)
+
+all		:	$(NAME)
+
+$(NAME)	:	$(OBJS)
+				$(CC) $(FLAGS) $(OBJS) -o $(NAME)
+
+%.o:%.c Makefile $(INCS)
+				$(CC) $(FLAGS) -c $< -o $@
+
+clean	:
+				rm -rf $(OBJS) $(DEPS)
+			
+fclean	:	clean
+				rm -rf $(NAME)
+
+re		:	fclean all
+
+-include $(DEPS)
+
+.PHONY	:	all clean fclean re
