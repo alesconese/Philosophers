@@ -18,29 +18,33 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <string.h>
+# include <sys/time.h>
 
 # define MALLOC_ERROR 1
 
-typedef struct	s_fork
-{
-	int	id;
-	pthread_mutex_t	fork;
-}	t_fork;
+typedef struct s_data	t_data;
 
-typedef struct	s_philo
+typedef struct s_philo
 {
-
+	int			id;
+	t_data		*data;
+	int			meals;
+	size_t		last_meal;
+	pthread_t	thid;
 }	t_philo;
 
-typedef struct 	s_data
+struct s_data
 {
-	int		n_philos;
-	int		t_die;
-	int		t_eat;
-	int		t_sleep;
-	int		n_meals;
-	t_philo	*philos;
-
-}	t_data;
+	int				n_philos;
+	int				t2die;
+	int				t2eat;
+	int				t2sleep;
+	int				req_meals;
+	pthread_mutex_t	print_mtx;
+	pthread_mutex_t	*forks_mtx;
+	t_philo			*philos;
+	size_t			start_time;
+	int				dead;
+};
 
 #endif

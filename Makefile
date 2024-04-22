@@ -18,7 +18,7 @@ SRCS	=	main.c
 
 INCS	=	philo.h
 
-FLAGS	=	-Wall -Wextra -Werror -MMD -g #-fsanitize=address -pthread
+FLAGS	=	-Wall -Wextra -Werror -MMD -pthread -g #-fsanitize=thread
 
 OBJS	=	$(SRCS:.c=.o)
 
