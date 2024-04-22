@@ -12,15 +12,7 @@
 
 #include "philo.h"
 
-size_t	get_current_time(void)
-{
-	struct timeval	time;
-
-	if (gettimeofday(&time, NULL) == -1)
-		write(2, "gettimeofday() error\n", 22);
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
-}
-
+//DEBUG FUNCTION. REMOVE!
 void	debug(t_philo *philo)
 {
 	size_t current_time;
@@ -31,6 +23,15 @@ void	debug(t_philo *philo)
 	printf("hola soy el filo ");
 	printf("%d\n", philo->id);
 	pthread_mutex_unlock(&philo->data->print_mtx);
+}
+
+size_t	get_current_time(void)
+{
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL) == -1)
+		write(2, "gettimeofday() error\n", 22);
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
 int	ft_atoi(char *str)
@@ -79,19 +80,34 @@ int	arg_checker(char **argv)
 
 void	*philo_loop(void *philo_void)
 {
-	t_philo	*philo = (t_philo *)philo_void;
+	t_philo	*philo;
+	int		flag;
+	
+	philo = (t_philo *)philo_void;
+	flag = 0;
 
+	//DEBUG FUNC. REMOVE!!
 	debug(philo);
 
-	//TRY TO LOCK L & R FORKS
-	//SET last_meal WHEN BOTH FORKS ARE LOCKED
-	//PRINT EATING MSG
-	//WAIT FOR t2eat
-	//UNLOCK FORKS
-	//PRINT SLEEPING MSG
-	//WAIT FOR t2sleep
-	//PRINT THINKING MSG
+	if (philo->data->req_meals >= 0)
+		flag = 1;
+	if (philo->id % 2 == 0)
+		ft_usleep(philo->data->t2eat / 2);//TODO
+	while (!philo->data->dead)
+	{
+		if (flag && philo->meals >= philo->data->req_meals)
+			break;
+		//TRY TO LOCK L & R FORKS
+		pthread_mutex_lock(&philo->data->forks_mtx[philo->id - 1]);
 
+		//SET last_meal WHEN BOTH FORKS ARE LOCKED
+		//PRINT EATING MSG
+		//WAIT FOR t2eat
+		//UNLOCK FORKS
+		//PRINT SLEEPING MSG
+		//WAIT FOR t2sleep
+		//PRINT THINKING MSG
+	}
 	return (NULL);
 }
 
