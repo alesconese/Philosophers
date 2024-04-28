@@ -36,15 +36,41 @@ typedef struct s_philo
 struct s_data
 {
 	int				n_philos;
-	int				t2die;
-	int				t2eat;
-	int				t2sleep;
+	size_t			t2die;
+	size_t			t2eat;
+	size_t			t2sleep;
 	int				req_meals;
+	size_t			start_time;
 	pthread_mutex_t	print_mtx;
+	pthread_mutex_t	death_mtx;
+	pthread_mutex_t	meals_mtx;
 	pthread_mutex_t	*forks_mtx;
 	t_philo			*philos;
-	size_t			start_time;
 	int				dead;
 };
+
+///// TIME /////
+
+size_t	get_current_time_ms(void);
+
+size_t	time_elapsed_ms(size_t	start);
+
+void	sleep_ms(size_t time_ms);
+
+///// MONITOR /////
+
+void	monitor_loop(t_data *data);
+
+///// INIT /////
+
+int		data_init(t_data *data, char **argv);
+
+///// PHILO_LOOP /////
+
+void	*philo_loop(void *philo_void);
+
+///// MAIN /////
+
+void	ft_cleanup(t_data *data);
 
 #endif

@@ -14,11 +14,11 @@ NAME	=	philo
 
 CC		=	gcc
 
-SRCS	=	main.c
+SRCS	=	src/main.c src/time.c src/monitor.c src/init.c src/philo_loop.c
 
-INCS	=	philo.h
+INCS	=	inc/philo.h
 
-FLAGS	=	-Wall -Wextra -Werror -MMD -pthread -g #-fsanitize=thread
+FLAGS	=	-Wall -Wextra -Werror -MMD -pthread -g -fsanitize=thread
 
 OBJS	=	$(SRCS:.c=.o)
 
