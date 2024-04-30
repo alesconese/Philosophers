@@ -15,20 +15,41 @@
 void	ft_join_threads(t_data *data, int n)
 {
 	int	i;
-	
+
 	i = 0;
-	while(i <= n)
+	while (i < n)
 	{
 		pthread_join(data->philos[i].thid, NULL);
 		i++;
 	}
+	ft_mutex_destroyer(data, 4, data->n_philos);
 }
 
-void	ft_cleanup(t_data *data)
+void	ft_mutex_destroyer(t_data *data, int step, int iters)
+{
+	int	i;
+
+	i = -1;
+	if (step >= 1)
+		pthread_mutex_destroy(&data->print_mtx);
+	if (step >= 2)
+		pthread_mutex_destroy(&data->death_mtx);
+	if (step == 3)
+		while (++i < iters)
+			pthread_mutex_destroy(&data->forks_mtx[i]);
+	if (step == 4)
+	{
+		while (++i < data->n_philos)
+			pthread_mutex_destroy(&data->forks_mtx[i]);
+		i = 0;
+		while (++i < iters)
+			pthread_mutex_destroy(&data->philos[i].philo_mtx);
+	}
+}
+
+static void	ft_cleanup(t_data *data)
 {
 	ft_join_threads(data, data->n_philos);
-
-	pthread_mutex_destroy(&data->print_mtx);
 	free(data->philos);
 	free(data->forks_mtx);
 	free (data);
@@ -39,17 +60,16 @@ int	main(int argc, char **argv)
 	t_data	*data;
 
 	if (argc < 5 || argc > 6)
-	{
-		printf("ERROR: Wrong arguments. Corrrect format is {./philo [number_of_philosophers] [time_to_die] [time_to_eat] [time_to_sleep] (OPT)[number_of_times_each_philosopher_must_eat]}\n");
-		return(1);
-	}
+		return (ft_error(ARGS), 1);
 	data = (t_data *)malloc(sizeof(t_data));
 	if (!data)
-		return(1);
+		return (1);
 	memset(data, 0, sizeof(t_data));
-	if (data_init(data, argv))
-		return (ft_cleanup(data), 1);
-	monitor_loop(data);
+	if (ft_data_init(data, argv))
+		return (free(data), 1);
+	if (ft_mutex_thread_init(data))
+		return (free(data->philos), free(data->forks_mtx), free(data), 1);
+	ft_monitor_loop(data);
 	ft_cleanup(data);
 	return (0);
 }

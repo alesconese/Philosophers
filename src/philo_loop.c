@@ -12,76 +12,81 @@
 
 #include "../inc/philo.h"
 
-//DEBUG FUNCTION. REMOVE!
-void	debug(t_philo *philo)
+void	ft_printaction_mtx(t_philo philo, t_action action, int fork)
 {
-	pthread_mutex_lock(&philo->data->print_mtx);
-	printf ("%zu ", time_elapsed_ms(philo->data->start_time));
-	printf("hola soy el filo ");
-	printf("%d\n", philo->id);
-	pthread_mutex_unlock(&philo->data->print_mtx);
+	size_t	timestamp;
+
+	pthread_mutex_lock(&philo.data->death_mtx);
+	if (philo.data->end)
+	{
+		pthread_mutex_unlock(&philo.data->death_mtx);
+		return ;
+	}
+	pthread_mutex_unlock(&philo.data->death_mtx);
+	pthread_mutex_lock(&philo.data->print_mtx);
+	timestamp = ft_elapsedtime_ms(philo.data->start_time);
+	if (action == FORK)
+		printf("%zu\t%d has taken fork %d\n", timestamp, philo.id, fork);
+	else if (action == EAT)
+		printf("%zu\t%d is eating\n", timestamp, philo.id);
+	else if (action == SLEEP)
+		printf("%zu\t%d is sleeping\n", timestamp, philo.id);
+	else if (action == THINK)
+		printf("%zu\t%d is thinking\n", timestamp, philo.id);
+	else if (action == DIE)
+		printf("%zu\t%d died\n", timestamp, philo.id);
+	pthread_mutex_unlock(&philo.data->print_mtx);
 }
 
-void	*philo_loop(void *philo_void)
+static void	ft_eat(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->data->forks_mtx[philo->id - 1]);
+	ft_printaction_mtx(*philo, FORK, philo->id - 1);
+	if (philo->id == philo->data->n_philos)
+	{
+		pthread_mutex_lock(&philo->data->forks_mtx[0]);
+		ft_printaction_mtx(*philo, FORK, 0);
+	}
+	else
+	{
+		pthread_mutex_lock(&philo->data->forks_mtx[philo->id]);
+		ft_printaction_mtx(*philo, FORK, philo->id);
+	}
+	ft_printaction_mtx(*philo, EAT, 0);
+	pthread_mutex_lock(&philo->philo_mtx);
+	philo->last_meal = ft_elapsedtime_ms(philo->data->start_time);
+	philo->meals++;
+	pthread_mutex_unlock(&philo->philo_mtx);
+	ft_sleep_ms(philo->data->t2eat);
+	pthread_mutex_unlock(&philo->data->forks_mtx[philo->id - 1]);
+	if (philo->id == philo->data->n_philos)
+		pthread_mutex_unlock(&philo->data->forks_mtx[0]);
+	else
+		pthread_mutex_unlock(&philo->data->forks_mtx[philo->id]);
+}
+
+void	*ft_philo_loop(void *philo_void)
 {
 	t_philo	*philo;
-	int		flag;
-	
+
 	philo = (t_philo *)philo_void;
-	flag = 0;
-	if (philo->data->req_meals >= 0)
-		flag = 1;
-	//if (philo->id % 2 == 0)
-		//ft_usleep(philo->data->t2eat / 2);//TODO
+	if (philo->id % 2 == 0)
+		ft_sleep_ms(30);
 	while (123)
 	{
 		pthread_mutex_lock(&philo->data->death_mtx);
-		if ((flag && (philo->meals >= philo->data->req_meals)) || philo->data->dead)
+		if (philo->data->end)
 		{
 			pthread_mutex_unlock(&philo->data->death_mtx);
 			return (NULL);
 		}
 		pthread_mutex_unlock(&philo->data->death_mtx);
-		//TRY TO LOCK L & R FORKS
-		pthread_mutex_lock(&philo->data->forks_mtx[philo->id - 1]);
-		if (philo->id == philo->data->n_philos)
-			pthread_mutex_lock(&philo->data->forks_mtx[0]);
-		else
-			pthread_mutex_lock(&philo->data->forks_mtx[philo->id]);
-		pthread_mutex_lock(&philo->data->print_mtx);
-		printf("%zu %d has taken fork %d\n", time_elapsed_ms(philo->data->start_time), philo->id, philo->id - 1);
-		if (philo->id == philo->data->n_philos)
-			printf("%zu %d has taken fork %d\n", time_elapsed_ms(philo->data->start_time), philo->id, 0);
-		else
-			printf("%zu %d has taken fork %d\n", time_elapsed_ms(philo->data->start_time), philo->id, philo->id);
-		pthread_mutex_unlock(&philo->data->print_mtx);
-		//SET last_meal WHEN BOTH FORKS ARE LOCKED
-		pthread_mutex_lock(&philo->data->meals_mtx);
-		philo->last_meal = time_elapsed_ms(philo->data->start_time);
-		pthread_mutex_unlock(&philo->data->meals_mtx);
-		//PRINT EATING MSG
-		pthread_mutex_lock(&philo->data->print_mtx);
-		printf("%zu %d is eating\n", time_elapsed_ms(philo->data->start_time), philo->id);
-		pthread_mutex_unlock(&philo->data->print_mtx);
-		//WAIT FOR t2eat
-		sleep_ms(philo->data->t2eat);
-		philo->meals++;
-		//UNLOCK FORKS
-		pthread_mutex_unlock(&philo->data->forks_mtx[philo->id - 1]);
-		if (philo->id == philo->data->n_philos)
-			pthread_mutex_unlock(&philo->data->forks_mtx[0]);
-		else
-			pthread_mutex_unlock(&philo->data->forks_mtx[philo->id]);
-		//PRINT SLEEPING MSG
-		pthread_mutex_lock(&philo->data->print_mtx);
-		printf("%zu %d is sleeping\n", time_elapsed_ms(philo->data->start_time), philo->id);
-		pthread_mutex_unlock(&philo->data->print_mtx);
-		//WAIT FOR t2sleep
-		sleep_ms(philo->data->t2sleep);
-		//PRINT THINKING MSG
-		pthread_mutex_lock(&philo->data->print_mtx);
-		printf("%zu %d is thinking\n", time_elapsed_ms(philo->data->start_time), philo->id);
-		pthread_mutex_unlock(&philo->data->print_mtx);
+		ft_eat(philo);
+		if (philo->meals == philo->data->req_meals)
+			break ;
+		ft_printaction_mtx(*philo, SLEEP, 0);
+		ft_sleep_ms(philo->data->t2sleep);
+		ft_printaction_mtx(*philo, THINK, 0);
 	}
 	return (NULL);
 }

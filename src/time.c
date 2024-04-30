@@ -12,7 +12,7 @@
 
 #include "../inc/philo.h"
 
-size_t	get_current_time_ms(void)
+size_t	ft_gettime_ms(void)
 {
 	struct timeval	time;
 
@@ -21,16 +21,16 @@ size_t	get_current_time_ms(void)
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-size_t	time_elapsed_ms(size_t	start)
+size_t	ft_elapsedtime_ms(size_t	start)
 {
-	return (get_current_time_ms() - start);
+	return (ft_gettime_ms() - start);
 }
 
-void	sleep_ms(size_t time_ms)
+void	ft_sleep_ms(size_t time_ms)
 {
 	size_t	begin;
 
-	begin = get_current_time_ms();
-	while (get_current_time_ms() < begin + time_ms)
+	begin = ft_gettime_ms();
+	while (ft_gettime_ms() < begin + time_ms)
 		usleep(500);
 }

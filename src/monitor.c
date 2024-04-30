@@ -12,29 +12,41 @@
 
 #include "../inc/philo.h"
 
-void	monitor_loop(t_data *data)
+static int	ft_deadorfull(t_philo *philo, int *full_counter)
+{
+	size_t	t_died;
+
+	pthread_mutex_lock(&philo->philo_mtx);
+	t_died = ft_elapsedtime_ms(philo->data->start_time) - philo->last_meal;
+	if (philo->meals == philo->data->req_meals)
+		(*full_counter)++;
+	pthread_mutex_unlock(&philo->philo_mtx);
+	if (t_died > philo->data->t2die)
+	{
+		ft_printaction_mtx(*philo, DIE, 0);
+		return (1);
+	}
+	return (0);
+}
+
+void	ft_monitor_loop(t_data *data)
 {
 	int	i;
-	size_t	t_died;//debug
+	int	full_counter;
+	int	philo_dead;
 
-
-	i = 0;
-	while (!data->dead)	
+	while (123)
 	{
 		i = 0;
+		full_counter = 0;
+		philo_dead = 0;
 		while (i < data->n_philos)
 		{
-			pthread_mutex_lock(&data->meals_mtx);
-			t_died = time_elapsed_ms(data->start_time) - data->philos[i].last_meal;//debug
-			pthread_mutex_unlock(&data->meals_mtx);
-			if (t_died > data->t2die)
+			philo_dead = ft_deadorfull(&data->philos[i], &full_counter);
+			if (philo_dead || full_counter == data->n_philos)
 			{
-				pthread_mutex_lock(&data->print_mtx);
-				printf ("%zu %d", time_elapsed_ms(data->start_time), data->philos[i].id);
-				printf (" has died\n");
-				pthread_mutex_unlock(&data->print_mtx);
 				pthread_mutex_lock(&data->death_mtx);
-				data->dead = 1;
+				data->end = 1;
 				pthread_mutex_unlock(&data->death_mtx);
 				return ;
 			}
