@@ -73,8 +73,8 @@ int	ft_data_init(t_data *data, char **argv)
 		data->req_meals = ft_atoi(argv[5]);
 	else
 		data->req_meals = -42;
-	if (data->n_philos < 0 || data->t2die < 0 || data->t2eat < 0 || \
-	data->t2sleep < 0 || data->req_meals == -1)
+	if (data->n_philos <= 0 || data->t2die < 0 || data->t2eat < 0 || \
+	data->t2sleep < 0 || data->req_meals == -1 || data->req_meals == 0)
 		return (1);
 	data->forks_mtx = (pthread_mutex_t *)malloc(data->n_philos \
 	* sizeof(pthread_mutex_t));

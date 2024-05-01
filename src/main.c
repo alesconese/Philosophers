@@ -55,6 +55,13 @@ static void	ft_cleanup(t_data *data)
 	free (data);
 }
 
+static void	ft_lonely_philo(t_data *data)
+{
+	printf("0\t1 has taken fork 0\n");
+	ft_sleep_ms(data->t2die);
+	printf("%zu\t1 died\n", data->t2die);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data	*data;
@@ -67,6 +74,9 @@ int	main(int argc, char **argv)
 	memset(data, 0, sizeof(t_data));
 	if (ft_data_init(data, argv))
 		return (free(data), 1);
+	if (data->n_philos == 1)
+		return (ft_lonely_philo(data), free(data->philos), \
+		free(data->forks_mtx), free(data), 1);
 	if (ft_mutex_thread_init(data))
 		return (free(data->philos), free(data->forks_mtx), free(data), 1);
 	ft_monitor_loop(data);
