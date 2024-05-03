@@ -111,7 +111,7 @@ int	ft_mutex_thread_init(t_data *data)
 		data->philos[i].id = i + 1;
 		if (pthread_create(&data->philos[i].thid, NULL, &ft_philo_loop, \
 		&(data->philos[i])))
-			return (ft_join_threads(data, i - 1), 1);
+			return (ft_join_threads(data, i), 1);
 	}
 	return (0);
 }
