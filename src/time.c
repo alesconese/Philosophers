@@ -18,7 +18,7 @@ size_t	ft_gettime_ms(void)
 
 	if (gettimeofday(&time, NULL) == -1)
 		return (-1);
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+	return (time.tv_sec * 1000 + time.tv_usec * 0.001);
 }
 
 size_t	ft_elapsedtime_ms(size_t	start)
@@ -32,5 +32,5 @@ void	ft_sleep_ms(size_t time_ms)
 
 	begin = ft_gettime_ms();
 	while (ft_gettime_ms() < begin + time_ms)
-		usleep(500);
+		usleep(100);
 }

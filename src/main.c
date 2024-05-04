@@ -79,6 +79,9 @@ int	main(int argc, char **argv)
 		free(data->forks_mtx), free(data), 1);
 	if (ft_mutex_thread_init(data))
 		return (free(data->philos), free(data->forks_mtx), free(data), 1);
+	pthread_mutex_lock(&data->death_mtx);
+	data->all_ready = 1;
+	pthread_mutex_unlock(&data->death_mtx);
 	ft_monitor_loop(data);
 	ft_cleanup(data);
 	return (0);

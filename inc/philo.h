@@ -45,6 +45,7 @@ struct s_data
 	pthread_mutex_t	death_mtx;
 	pthread_mutex_t	*forks_mtx;
 	t_philo			*philos;
+	int				all_ready;
 	size_t			start_time;
 	int				end;
 };

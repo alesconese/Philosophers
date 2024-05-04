@@ -16,6 +16,7 @@ void	ft_printaction_mtx(t_philo philo, t_action action, int fork)
 {
 	size_t	timestamp;
 
+	(void)fork;
 	pthread_mutex_lock(&philo.data->death_mtx);
 	if (philo.data->end)
 	{
@@ -26,7 +27,7 @@ void	ft_printaction_mtx(t_philo philo, t_action action, int fork)
 	pthread_mutex_lock(&philo.data->print_mtx);
 	timestamp = ft_elapsedtime_ms(philo.data->start_time);
 	if (action == FORK)
-		printf("%zu\t%d has taken fork %d\n", timestamp, philo.id, fork);
+		printf("%zu\t%d has taken a fork \n", timestamp, philo.id);
 	else if (action == EAT)
 		printf("%zu\t%d is eating\n", timestamp, philo.id);
 	else if (action == SLEEP)
@@ -65,11 +66,26 @@ static void	ft_eat(t_philo *philo)
 		pthread_mutex_unlock(&philo->data->forks_mtx[philo->id]);
 }
 
+void	ft_wait_others(t_data *data)
+{
+	while (123)
+	{
+		pthread_mutex_lock(&data->death_mtx);
+		if (data->all_ready)
+		{
+			pthread_mutex_unlock(&data->death_mtx);
+			return ;
+		}
+		pthread_mutex_unlock(&data->death_mtx);
+	}
+}
+
 void	*ft_philo_loop(void *philo_void)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)philo_void;
+	ft_wait_others(philo->data);
 	if (philo->id % 2 == 0)
 		ft_sleep_ms(30);
 	while (123)

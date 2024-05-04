@@ -103,7 +103,6 @@ int	ft_mutex_thread_init(t_data *data)
 	while (++i < data->n_philos)
 		if (pthread_mutex_init(&data->philos[i].philo_mtx, NULL))
 			return (ft_mutex_destroyer(data, 4, i), 1);
-	data->start_time = ft_gettime_ms();
 	i = -1;
 	while (++i < data->n_philos)
 	{
@@ -113,5 +112,6 @@ int	ft_mutex_thread_init(t_data *data)
 		&(data->philos[i])))
 			return (ft_join_threads(data, i), 1);
 	}
+	data->start_time = ft_gettime_ms();
 	return (0);
 }
